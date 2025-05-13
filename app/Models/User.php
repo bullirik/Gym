@@ -6,19 +6,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens; // <--- ДОБАВЛЕН ИМПОРТ ДЛЯ SANCTUM
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable; // <--- ДОБАВЛЕН ТРЕЙТ HasApiTokens
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'name',     // Стандартное поле Laravel, оставляем на случай, если оно есть в таблице users
+        'username', // Наше поле для логина
         'email',
         'password',
     ];
@@ -26,7 +27,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -42,7 +43,16 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password' => 'hashed', // Laravel автоматически хэширует пароль
         ];
+    }
+
+    /**
+     * Получить все тренировки этого пользователя.
+     * (Это отношение мы добавляли ранее, оно полезно)
+     */
+    public function workoutLogs()
+    {
+        return $this->hasMany(WorkoutLog::class);
     }
 }
